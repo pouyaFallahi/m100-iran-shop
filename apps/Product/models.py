@@ -22,7 +22,7 @@ class Product(models.Model):
     price = models.IntegerField()
     many = models.IntegerField()
     price = models.IntegerField()
-    categotory = models.ForeignKey('Categorey', on_delete=models.CASCADE)
+    categotory = models.ForeignKey('Category', on_delete=models.CASCADE)
     company = models.ForeignKey('Company', on_delete=models.CASCADE)
 
     def __str__(self):
