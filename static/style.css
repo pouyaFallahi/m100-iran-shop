@@ -1,5 +1,22 @@
+:root{
+    background-color: #F3EDC8;
+}
+
+.body {
+   background-color: #F3EDC8!important;
+}
+
 .product {
         margin-right: 55%;
         margin-left: 1px;
         padding: 2px;
+}
+
+.col-style{
+        margin-top: 10%;
+}
+
+.colors{
+        background-color: #F3EDC8!important;
+
 }

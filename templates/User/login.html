@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ block.super }} login {% endblock %}
 
 {% block content %}
-    <form method="post" action="{% url 'login_page' %}">
+ <div class="container text-center colors">
+  <div class="row">
+    <div class="col-2">
+
+    </div>
+    <div class="col-8 col-style shadow-lg p-3 mb-5 bg-body-tertiary rounded" >
+          <form method="post" action="{% url 'login_page' %}">
         {% csrf_token %}
+        <h3>Login Form</h3>
+        <hr>
         {{ form.as_p }}
         {{ form.error_message }}
         <button type="submit" class="btn btn-outline-danger">
@@ -14,4 +23,11 @@
             ورود
         </button>
     </form>
+    </div>
+    <div class="col-2">
+
+    </div>
+  </div>
+</div>
+
 {% endblock %}
