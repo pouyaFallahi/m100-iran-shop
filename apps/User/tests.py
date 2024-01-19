@@ -33,7 +33,7 @@ class UserModelTest(TestCase):
 
     def test_permission_observer(self):
         observer_data = {
-            'email': 'observer@example.com',
+            'email': 'observer@exple.com',
             'password': 'observerpassword',
             'username': 'observeruser',
             'is_observer': True

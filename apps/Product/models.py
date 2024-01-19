@@ -7,6 +7,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name_category
 
+
 class Company(models.Model):
     company_name = models.CharField(max_length=254, blank=True, null=True)
     datil = models.TextField()
@@ -21,10 +22,8 @@ class Product(models.Model):
     datil = models.TextField()
     price = models.IntegerField()
     many = models.IntegerField()
-    price = models.IntegerField()
     categotory = models.ForeignKey('Category', on_delete=models.CASCADE)
     company = models.ForeignKey('Company', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name_product
-
