@@ -1,14 +1,15 @@
 {% load static %}
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-lg p-3 mb-5 bg-body-tertiary rounded" style="background-color: #BF3131!important;">
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-lg p-3 mb-5 bg-body-tertiary rounded navbar-dark-color bg-dark">
   <div class="container-fluid" >
-      <nav class="navbar bg-body-tertiary" style="background-color: #BF3131!important;">
-  <div class="container" style="background-color: #BF3131!important;">
-    <a class="navbar-brand" href="{% url 'home_page' %}">
-      <img src="{% static 'logo.png' %}" alt="" width="60" height="60">
-    </a>
-  </div>
-</nav>
+
+      <nav class="navbar bg-body-tertiary">
+          <div class="container">
+            <a class="navbar-brand" href="{% url 'home_page' %}">
+              <img src="{% static 'logo.png' %}" alt="" width="60" height="60">
+            </a>
+          </div>
+      </nav>
     <a class="navbar-brand" href="{% url 'home_page' %}">ایران شاپ</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -16,7 +17,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent" >
       <ul class="navbar-nav me-rtl mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">محصولات</a>
+          <a class="nav-link active" aria-current="page" href="{% url 'item_cart' %}">محصولات</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
