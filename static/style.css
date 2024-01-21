@@ -1,9 +1,9 @@
 :root{
-    background-color: #F3EDC8;
+    background-color: #08D9D6!important;
 }
 
-.body {
-   background-color: #F3EDC8!important;
+body {
+   background-color: #08D9D6!important;
 }
 
 .product {
@@ -15,8 +15,10 @@
 .col-style{
         margin-top: 10%;
 }
+.set-color{
+    background-color: #EAEAEA;
+    }
 
-.colors{
-        background-color: #F3EDC8!important;
-
+.font-color{
+    color: #EAEAEA;
 }
