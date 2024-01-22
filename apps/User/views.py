@@ -23,6 +23,7 @@ class LogOutView(View):
             response = redirect('home_page')
             response.set_cookie('latest_user_login', user_login)
             response.set_cookie('count_of_logout', count_of_logout[user_login])
+            response.delete_cookie('cart_data')
             return response
 
 
