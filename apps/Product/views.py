@@ -2,10 +2,11 @@
 import json
 from .models import Product
 from django.contrib import messages
-from django.http import JsonResponse
 from django.views.generic import ListView
 from django.views.generic.base import View
-from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext_lazy as _
 
 
 def get_product_by_id(product_id):
@@ -32,46 +33,72 @@ class ShowItem(ListView):
         return product
 
 
-class RemoveFromCartView(View):
+def get_cart_from_cookie(request):
+    cart_data = request.COOKIES.get('cart_data', '{}')
+    return json.loads(cart_data)
 
-    def post(self, request):
-        item_id = request.POST.get('item_id')
-        item = get_object_or_404(Product, pk=Product.id)
-        cart = request.COOKIES.get('shopping_cart')
-        cart = json.loads(cart) if cart else {}
-        cart_item = cart.get(str(Product.id), {'quantity': 0})
-        cart_item['item_id'] = Product.id
-        cart_item['name'] = Product.name_product
-        cart_item['price'] = Product.price
-        if cart_item and cart_item['quantity'] > 0:
-            cart_item['quantity'] -= 1
-        cart[str(item.id)] = cart_item
-        response = redirect('/coffe/')
-        response.set_cookie('shopping_cart', json.dumps(cart))
-        messages.success(request, f'{item.name} removed from shopping cart!')
+
+def add_product_to_cart(request, product_id, quantity=1):
+    item_in_db = Product.objects.get(id=product_id)
+    cart_data = get_cart_from_cookie(request)
+
+    if str(product_id) in cart_data:
+        total_quantity = cart_data[str(product_id)] + quantity
+    else:
+        total_quantity = quantity
+
+    if item_in_db.many >= total_quantity:  # Check if the available quantity is sufficient
+        if str(product_id) in cart_data:
+            cart_data[str(product_id)] += quantity
+        else:
+            cart_data[str(product_id)] = quantity
+        response = HttpResponse()
+        response.set_cookie("cart_data", json.dumps(cart_data))
+        print(cart_data)
         return response
+    else:
+        return HttpResponse("The requested quantity is not available", status=400)
 
 
-class AddToCartView(View):
-    def post(self, request):
-        product_id = request.POST.get('name_product')
-        print('product_id:', product_id)
-        product = get_object_or_404(Product, pk=product_id)
+def add_to_cart(request, product_id):
+    return add_product_to_cart(request, product_id)
 
-        # از کوکی‌ها سبد خرید را دریافت یا یک واژه‌نامه خالی ایجاد کنید
-        cart = json.loads(request.COOKIES.get('shopping_cart', '{}'))
 
-        cart_item = cart.get(str(product.id), {'quantity': 0})
-        cart_item['item_id'] = product.id
-        cart_item['name'] = product.name_product
-        cart_item['price'] = product.price
-        cart_item['quantity'] += 1
+def remove_all_cart(request):
+    response = HttpResponse()
+    response.delete_cookie("cart_data")
+    return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from cart.')})
 
-        cart[str(product.id)] = cart_item
 
-        response_data = {'message': f'{product.name_product} به سبد خرید اضافه شد!', 'cart': cart}
-        response = JsonResponse(response_data)
+def remove_from_cart(request, product_id):
+    item_in_db = Product.objects.get(id=product_id)
+    cart_data = get_cart_from_cookie(request)
 
-        response.set_cookie('shopping_cart', json.dumps(cart))
+    if item_in_db.many >= 0:
+        if str(product_id) in cart_data:
+            if cart_data[str(product_id)] > 1:
+                cart_data[str(product_id)] -= 1  # Decrement the quantity by 1
+            else:
+                del cart_data[str(product_id)]  # Remove the product if the quantity is 1
+            response = HttpResponse()
+            response.set_cookie("cart_data", json.dumps(cart_data))
+            return response
+        else:
+            return HttpResponse("The requested quantity is not available", status=400)
+    else:
+        return HttpResponse("The requested quantity is not available", status=400)
 
-        return response
+
+def show_cart_items(request):
+    cart_data = get_cart_from_cookie(request)
+    order_list = []
+    for product_id, quantity in cart_data.items():
+        product = Product.objects.get(id=product_id)
+        order_list.append({
+            'product_id': product_id,
+            'product_name': product.name_product,
+            'quantity': quantity,
+            'price': product.price
+        })
+    return render(request, 'Product/list-of-orders.html', {'order_list': order_list})
+    # return JsonResponse(order_list, safe=False) => for json
