@@ -11,7 +11,8 @@
   </head>
   <body dir="rtl">
     {# Inherit from NAVBAR #}
-    {% include 'navbar.html' %}
+    {% include 'navbar.html' with category=category %}
+    
     
     
     {% block content %}

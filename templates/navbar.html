@@ -24,9 +24,11 @@
             دسته بند
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">استان ها</a></li>
-            <li><a class="dropdown-item" href="#">خشک بار</a></li>
-            <li><a class="dropdown-item" href="#">خوراکی</a></li>
+{#          {% with category_=category %}#}
+              {%  for obj in category %}
+              <li><a class="dropdown-item" href="{% url 'item_by_category' name_category=obj %}"> {{ obj }} </a></li>
+              {% endfor %}
+{#          {% endwith %}#}
           </ul>
         </li>
       </ul>
