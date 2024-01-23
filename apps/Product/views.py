@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
-from .models import Product
 from django.contrib import messages
+from .models import Product, Category
 from django.views.generic import ListView
 from django.views.generic.base import View
 from django.http import JsonResponse, HttpResponse
@@ -102,3 +102,12 @@ def show_cart_items(request):
         })
     return render(request, 'Product/list-of-orders.html', {'order_list': order_list})
     # return JsonResponse(order_list, safe=False) => for json
+
+
+class ShowItemByCategory(View):
+    model = Category
+    def get(self, request, name_category):
+        category = get_object_or_404(Category, name_category=name_category)
+        print(category)
+        products = Product.objects.filter(category=category)
+        return render(request, 'Product/list-item.html', {'products': products})
