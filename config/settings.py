@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -118,3 +119,15 @@ LOGOUT_REDIRECT_URL = 'home_page'
 
 
 DEFAULT_CHARSET = 'utf-8'
+
+# برای App main
+MAIN_MEDIA_URL = '/'
+MAIN_MEDIA_ROOT = os.path.join(BASE_DIR, 'apps/main/images')
+
+# برای App Product
+PRODUCT_MEDIA_URL = '/'
+PRODUCT_MEDIA_ROOT = os.path.join(BASE_DIR, 'apps/Product/images')
+
+# تنظیمات MEDIA_URL و MEDIA_ROOT
+MEDIA_URL = os.path.join(BASE_DIR, '/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
