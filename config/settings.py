@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'apps.User',
     'apps.main',
     'apps.Product',
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [
@@ -120,14 +121,22 @@ LOGOUT_REDIRECT_URL = 'home_page'
 
 DEFAULT_CHARSET = 'utf-8'
 
-# برای App main
-MAIN_MEDIA_URL = '/'
-MAIN_MEDIA_ROOT = os.path.join(BASE_DIR, 'apps/main/images')
-
-# برای App Product
-PRODUCT_MEDIA_URL = '/'
-PRODUCT_MEDIA_ROOT = os.path.join(BASE_DIR, 'apps/Product/images')
-
-# تنظیمات MEDIA_URL و MEDIA_ROOT
-MEDIA_URL = os.path.join(BASE_DIR, '/')
+MEDIA_URL = '/images/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
+
+# Celery Settings
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = {'application/json'}
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'
+CELERY_RESULT_BACKEND = 'django-db'
+
+# SMTP Settings
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'pouya.fallahi80@gmail.com'
+EMAIL_HOST_PASSWORD = 'lnce zcsl cqrm qdsx'
+DEFAULT_FROM_EMAIL = '<pouya.fallahi80@gmail.com>'
