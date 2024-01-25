@@ -20,7 +20,7 @@ class Company(models.Model):
 
 class Product(models.Model):
     name_product = models.CharField(max_length=255, blank=True, null=True)
-    imag_product = models.ImageField(upload_to='apps/Product/images/')
+    imag_product = models.ImageField(upload_to='Product/')
     details = models.TextField()
     price = models.IntegerField()
     many = models.IntegerField()
