@@ -1,4 +1,16 @@
 from django.db import models
+from django.utils.safestring import mark_safe
+
+
+class ImageForProduct(models.Model):
+    image = models.ImageField(upload_to='Product/')
+    description = models.CharField(max_length=254)
+
+    def image_display(self):
+        return mark_safe(f'<img src="{self.image.url}" width="100" />')
+
+    def __str__(self):
+        return f'{self.id} {self.description}'
 
 
 class Category(models.Model):
@@ -20,7 +32,7 @@ class Company(models.Model):
 
 class Product(models.Model):
     name_product = models.CharField(max_length=255, blank=True, null=True)
-    imag_product = models.ImageField(upload_to='Product/')
+    imag_product = models.ManyToManyField(ImageForProduct)
     details = models.TextField()
     price = models.IntegerField()
     many = models.IntegerField()

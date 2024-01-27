@@ -2,11 +2,12 @@
 import json
 from django.contrib import messages
 from .models import Product, Category
-from django.views.generic import ListView
 from django.views.generic.base import View
 from django.http import JsonResponse, HttpResponse
+from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
+
 
 
 def get_product_by_id(product_id):
@@ -14,18 +15,20 @@ def get_product_by_id(product_id):
 
 
 class ShowAllItems(ListView):
-    model = Product
-    template_name = 'Product/list-item.html'
+    def get(self, request, *args, **kwargs):
+        product = Product.objects.all()
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        product = super(ShowAllItems, self).get_context_data(**kwargs)
-        product['products'] = Product.objects.all()
-        return product
+        if request.headers.get('Accept') == 'application/json':
+            data = {'product': list(product.values())}
+            return JsonResponse(data)
+        else:
+            return render(request, 'Product/list-item.html', {'products': product})
 
 
-class ShowItem(ListView):
+class ShowItem(DetailView):
     model = Product
     template_name = 'Product/item.html'
+    print(model.imag_product)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         product = super(ShowItem, self).get_context_data(**kwargs)
@@ -111,3 +114,4 @@ class ShowItemByCategory(View):
         print(category)
         products = Product.objects.filter(category=category)
         return render(request, 'Product/list-item.html', {'products': products})
+
