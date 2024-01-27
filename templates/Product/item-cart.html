@@ -7,7 +7,7 @@
                     <div class="card fourth-color shadow p-3 mb-5 bg-body-tertiary rounded" style="width: 18rem;">
                         <img class="img-thumbnail card-img-top" src="{{ product.imag_product.url }}">
                         <div class="card-body">
-                            <h5 class="card-title">{{ product.name_product }}</h5>
+                            <h5 class="card-title">{{ product.title }}</h5>
                             <p class="card-text">{{ product.details|truncatechars:50 }}</p>
                             <p class="card-text">{{ product.price }} - تومن </p>
                             {% csrf_token %}
