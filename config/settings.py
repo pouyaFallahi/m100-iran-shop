@@ -92,6 +92,7 @@ AUTH_USER_MODEL = 'User.User'
 # Authentication
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'apps.User.backends.PhoneNumberBackend',
 ]
 
 
