@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from django.contrib import admin
 from django.urls import path
 from .views import carousel_view
-from ..User.views import LogingView, LogOutView, SignUpView, authentication_email, verify_registration
+from django.conf import settings
+from django.conf.urls.static import static
+from ..User.views import LogingView, LogOutView, SignUpView, authentication_email, verify_registration, LoginPhoneView, \
+    ForgetPasswordView
 from ..Product.views import ShowAllItems, ShowItem, add_to_cart, remove_from_cart, show_cart_items, remove_all_cart, \
     ShowItemByCategory
-from django.conf.urls.static import static
-from django.conf import settings
 
 urlpatterns = [
                   path('', carousel_view, name='home_page'),
@@ -22,6 +22,9 @@ urlpatterns = [
                   path('product/<str:name_category>/', ShowItemByCategory.as_view(), name='item_by_category'),
                   path('user/signup/email/', authentication_email, name='authentication_email'),
                   path('verify-registration/', verify_registration, name='verify_registration'),
+                  path('user/loginPhone/', LoginPhoneView.as_view(), name='loginPhone_page'),
+                  path('user/forgetPassword/', ForgetPasswordView.as_view(), name='forget_password'),
+
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL,
                                                                                            document_root=settings.
                                                                                            MEDIA_ROOT)
