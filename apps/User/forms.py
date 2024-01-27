@@ -18,7 +18,7 @@ class YourForm(forms.Form):
     )
 
 
-class SignUpForm(UserCreationForm):
+class SignUpFormEmail(UserCreationForm):
     class Meta:
         model = User
         fields = ['full_name', 'email', 'phone_number']
@@ -26,4 +26,9 @@ class SignUpForm(UserCreationForm):
 
 class SubscribeForm(forms.Form):
     email = forms.EmailField()
-    message = forms.CharField(label='chek your mail')
+    message = forms.CharField(label='check your mail')
+
+
+class PhoneNumberLoginForm(forms.Form):
+    phone_number = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)

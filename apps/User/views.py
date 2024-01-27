@@ -1,14 +1,36 @@
 from django.urls import reverse_lazy
 from django.http import HttpResponse
-from django.contrib.auth import logout, login
 from .tasks import send_verification_email
 from django.shortcuts import redirect, render
-from .forms import UserCreationForm, SignUpForm
+from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.views import LoginView
-from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView, View, edit
+from django.contrib.auth.decorators import login_required
+from .forms import UserCreationForm, SignUpForm, PhoneNumberLoginForm
+from .models import User
 
 
+class LoginPhoneView(View):
+    form_class = PhoneNumberLoginForm
+    template_name = 'User/login-phone.html'
+
+    def get(self, request):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            phone_number = form.cleaned_data['phone_number']
+            password = form.cleaned_data['password']
+            user = authenticate(request, phone_number=phone_number, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home_page')
+            else:
+                return render(request, self.template_name, {'form': form, 'error_message': 'Invalid login'})
+        else:
+            return render(request, self.template_name, {'form': form})
 
 
 class LogingView(LoginView):
@@ -60,6 +82,11 @@ def authentication_email(request):
     return HttpResponse('Verification email sent!')
 
 
+class ForgetPasswordView(edit.UpdateView):
+    model = User
+    form_class = UserCreationForm
+    template_name = 'User/forget_password.html'
+    success_url = reverse_lazy('login_page')
 
-
-
+    def get(self, request, *args, **kwargs):
+        return render(self.request, 'User/forget_password.html')
