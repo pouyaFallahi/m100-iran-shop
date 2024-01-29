@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %} {{ block.super }} verify email {% endblock %}
+{% block title %} {{ block.super }} {{ _('تایید ایمیل') }} {% endblock %}
 
 {% block content %}
     <div class="container">
       <h2 style="margin-top: 10px">
-        Verify registration.
+            {{ _('ارسال ایمیل تایید از پشتبانی') }}
       </h2>
       <form method="POST">
         {% csrf_token %} {{form.as_p}}

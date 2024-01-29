@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ block.super }} Authentication Email {% endblock %}
+{% block title %}{{ block.super }} {{ _('تایید ایمیل') }} {% endblock %}
 
 {% block content %}
     <div class="container">
       <h2 style="margin-top: 10px">
-        Subscribe to me so I can send you an asynchronous mail via Celery and Redis.
+            {{ _('ارسال ایمیل تایید از پشتبانی') }}
       </h2>
       <form method="POST">
         {% csrf_token %} {{form.as_p}}
-        <button class="btn btn-success">Subscribe!</button>
+        <button class="btn btn-success"> {{ _('تایید کردن') }} </button>
       </form>
     </div>
 {% endblock %}

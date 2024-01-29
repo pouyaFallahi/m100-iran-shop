@@ -1,0 +1,15 @@
+{% load load_category %}
+<ul class="navbar-nav">
+    {% for category in categories %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ category.name_category }}
+            </a>
+            <ul class="dropdown-menu">
+                {% for subcategory in category.category_set.all %}
+                    <li><a class="dropdown-item" href="{% url 'item_by_category' name_category=subcategory.name_category %}">{{ subcategory.name_category }}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+</ul>

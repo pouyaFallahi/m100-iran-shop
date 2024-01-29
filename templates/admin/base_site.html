@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %} {{ _('IRAN Shop admin') }} {% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'logo.png'%}" alt="" width="50" height="50">
+        <a style="margin-top: 1px; padding-top: 1px ">{{ _('IRAN Shop administration') }}</a>
+    </a>
+</div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
