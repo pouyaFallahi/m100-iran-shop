@@ -43,7 +43,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR/'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,7 +109,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 # Default primary key field type
@@ -139,5 +139,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'pouya.fallahi80@gmail.com'
-EMAIL_HOST_PASSWORD = 'lnce zcsl cqrm qdsx'
-DEFAULT_FROM_EMAIL = '<pouya.fallahi80@gmail.com>'
+EMAIL_HOST_PASSWORD = 'pwniozyjtftsctwx'
+DEFAULT_FROM_EMAIL = 'pouya.fallahi80@gmail.com'
