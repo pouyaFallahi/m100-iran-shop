@@ -28,7 +28,6 @@ class ShowAllItems(ListView):
 class ShowItem(DetailView):
     model = Product
     template_name = 'Product/item.html'
-    print(model.imag_product)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         product = super(ShowItem, self).get_context_data(**kwargs)

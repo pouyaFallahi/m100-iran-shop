@@ -32,7 +32,7 @@ class Company(models.Model):
 
 class Product(models.Model):
     name_product = models.CharField(max_length=255, blank=True, null=True)
-    imag_product = models.ManyToManyField(ImageForProduct)
+    image = models.ManyToManyField(ImageForProduct, blank=True, null=True)
     details = models.TextField()
     price = models.IntegerField()
     many = models.IntegerField()
