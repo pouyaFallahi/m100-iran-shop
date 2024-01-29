@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 
 User = get_user_model()
 
@@ -8,7 +9,27 @@ User = get_user_model()
 class SignUpForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['full_name', 'email', 'phone_number']
+        fields = ['username', 'full_name', 'email', 'phone_number', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('User Name'),
+                       'aria-label': 'User Name'}),
+            'full_name': forms.TextInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Full Name'),
+                       'aria-label': 'Full Name'}),
+            'email': forms.EmailInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'email', 'placeholder': _('Email'),
+                       'aria-label': 'Email'}),
+            'phone_number': forms.TextInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Phone Number'),
+                       'aria-label': 'Phone Number'}),
+            'password1': forms.PasswordInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'password', 'placeholder': _('Password'),
+                       'aria-label': 'Password'}),
+            'password2': forms.PasswordInput(attrs={'class': 'form-control form-control-lg', 'type': 'password',
+                                                    'placeholder': _('Confirm Password'),
+                                                    'aria-label': 'Confirm Password'}),
+        }
 
 
 class YourForm(forms.Form):
@@ -30,5 +51,9 @@ class SubscribeForm(forms.Form):
 
 
 class PhoneNumberLoginForm(forms.Form):
-    phone_number = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
+    phone_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Phone Number'), 'aria-label': 'Phone Number'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg', 'type': 'password', 'placeholder': _('Password'), 'aria-label': 'Password'}))
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    email_fild = forms.EmailField(label='email', widget=forms.EmailInput(attrs={'class': 'form-control form-control-lg', 'type': 'email', 'placeholder' : _('Email'), 'aria-label': 'Email'}))

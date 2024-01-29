@@ -1,13 +1,19 @@
+import json
+
+from .models import User
 from django.urls import reverse_lazy
 from django.http import HttpResponse
+from django.contrib import messages
 from .tasks import send_verification_email
 from django.shortcuts import redirect, render
-from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.views import LoginView
-from django.views.generic import CreateView, View, edit
-from django.contrib.auth.decorators import login_required
-from .forms import UserCreationForm, SignUpForm, PhoneNumberLoginForm
-from .models import User
+from django.views.generic import CreateView, View
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import logout, login, authenticate
+from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm
+
+count_of_logout = {}
 
 
 class LoginPhoneView(View):
@@ -28,17 +34,32 @@ class LoginPhoneView(View):
                 login(request, user)
                 return redirect('home_page')
             else:
-                return render(request, self.template_name, {'form': form, 'error_message': 'Invalid login'})
+                return render(request, self.template_name, {'form': form, 'error_message': _('Invalid login')})
         else:
             return render(request, self.template_name, {'form': form})
 
 
 class LogingView(LoginView):
     template_name = 'User/login.html'
-    success_url = reverse_lazy('')
+    success_url = reverse_lazy('home_page')
 
 
-count_of_logout = {}
+def change_password(request):
+    if not request.user.is_authenticated:
+        if request.method == 'POST':
+            form = CustomPasswordChangeForm(request.user, request.POST)
+            if form.is_valid():
+                user = form.save()
+                update_session_auth_hash(request, user)  # نیاز است تا جلوی لاگ‌اوت از کاربر را بگیریم
+                messages.success(request, _('Password changed!'))
+                return redirect('login_page')
+            else:
+                messages.error(request, _('Please make the required corrections.'))
+        else:
+            form = CustomPasswordChangeForm(request.user)
+        return render(request, 'User/forget_password.html', {'form': form})
+    else:
+        return HttpResponse(_('You do not have permission to access this section.'))
 
 
 class LogOutView(View):
@@ -56,37 +77,20 @@ class LogOutView(View):
 
 class SignUpView(CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy('login_page')
+    success_url = reverse_lazy('verify_email')
     template_name = 'User/signup.html'
 
-
-def verify_registration(request):
-    if request.method == 'POST':
-        form = VerificationForm(request.POST)
-        if form.is_valid():
-            request.user.profile.verified = True
-            request.user.save()
-
-            return render(request, 'User/verification_success.html')
-    else:
-        form = VerificationForm()
-
-    return render(request, 'User/verify_registration.html', {'form': form})
+    # def post(self, request):
+    #     email = request.POST.get('email')
+    #     response = HttpResponse()
+    #     response.set_cookie('email', json.dump(email))
+    #     return response
 
 
-def authentication_email(request):
-    verification_code = '123456'
-
-    send_verification_email.delay(request.user.email, verification_code)
-
-    return HttpResponse('Verification email sent!')
+def create_code():
+    return ''.join(str(i) for i in range(10))
 
 
-class ForgetPasswordView(edit.UpdateView):
-    model = User
-    form_class = UserCreationForm
-    template_name = 'User/forget_password.html'
-    success_url = reverse_lazy('login_page')
-
-    def get(self, request, *args, **kwargs):
-        return render(self.request, 'User/forget_password.html')
+def verify_email_view(request):
+    send_verification_email.delay('1380pouy@gmail.com', create_code())
+    return
