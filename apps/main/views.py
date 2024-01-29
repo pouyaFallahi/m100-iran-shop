@@ -7,7 +7,6 @@ from django.views.generic import ListView
 
 def carousel_view(request):
     carousel_img = CarouselImg.objects.all()
-    category = Category.objects.all()
-    return render(request, 'home-page.html', {'carousel_img': carousel_img, 'category': category})
+    return render(request, 'home-page.html', {'carousel_img': carousel_img})
 
 
