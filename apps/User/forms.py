@@ -51,9 +51,23 @@ class SubscribeForm(forms.Form):
 
 
 class PhoneNumberLoginForm(forms.Form):
-    phone_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Phone Number'), 'aria-label': 'Phone Number'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control form-control-lg', 'type': 'password', 'placeholder': _('Password'), 'aria-label': 'Password'}))
+    phone_number = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Phone Number'),
+               'aria-label': 'Phone Number'}))
+    password = forms.CharField(widget=forms.PasswordInput(
+        attrs={'class': 'form-control form-control-lg', 'type': 'password', 'placeholder': _('Password'),
+               'aria-label': 'Password'}))
 
 
 class CustomPasswordChangeForm(PasswordChangeForm):
-    email_fild = forms.EmailField(label='email', widget=forms.EmailInput(attrs={'class': 'form-control form-control-lg', 'type': 'email', 'placeholder' : _('Email'), 'aria-label': 'Email'}))
+    email_fild = forms.EmailField(label='email', widget=forms.EmailInput(
+        attrs={'class': 'form-control form-control-lg', 'type': 'email', 'placeholder': _('Email'),
+               'aria-label': 'Email'}))
+
+
+class VerifyEmailForm(forms.Form):
+    code = forms.CharField(label='code', widget=forms.EmailInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Code'),
+                       'aria-label': 'code'}),
+
+    )

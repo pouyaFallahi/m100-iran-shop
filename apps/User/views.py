@@ -1,5 +1,5 @@
 import json
-
+from random import randint
 from .models import User
 from django.urls import reverse_lazy
 from django.http import HttpResponse
@@ -11,7 +11,7 @@ from django.views.generic import CreateView, View
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import logout, login, authenticate
-from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm
+from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm
 
 count_of_logout = {}
 
@@ -77,20 +77,42 @@ class LogOutView(View):
 
 class SignUpView(CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy('verify_email')
+    success_url = reverse_lazy('verify_email_view')
     template_name = 'User/signup.html'
 
-    # def post(self, request):
-    #     email = request.POST.get('email')
-    #     response = HttpResponse()
-    #     response.set_cookie('email', json.dump(email))
-    #     return response
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        email = form.cleaned_data['email']  # Assuming the email field in the form is named 'email'
+        response.set_cookie('user_email', email)
+        return response
 
 
 def create_code():
-    return ''.join(str(i) for i in range(10))
+    return str(randint(100000, 999999))
+
+
+user_code = create_code()
 
 
 def verify_email_view(request):
-    send_verification_email.delay('1380pouy@gmail.com', create_code())
-    return
+    user_email = request.COOKIES.get('user_email')
+    code = user_code
+    print(code)
+    send_verification_email.delay(user_email, code)
+    return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': code})
+
+
+def verify_code(request):
+    if request.method == 'POST':
+        form = VerifyEmailForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['code']
+            if code == user_code:
+                return redirect('login_page')
+            else:
+                return render(request, 'User/verify_registration.html',
+                              {'form': VerifyEmailForm, 'code': code, 'message': 'code is not correct'})
+        else:
+            return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
+    else:
+        return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
