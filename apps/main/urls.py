@@ -3,7 +3,8 @@ from django.urls import path
 from .views import carousel_view
 from django.conf import settings
 from django.conf.urls.static import static
-from ..User.views import LogingView, LogOutView, SignUpView, LoginPhoneView, change_password, verify_email_view
+from ..User.views import LogingView, LogOutView, SignUpView, LoginPhoneView, change_password, verify_email_view, \
+    verify_code
 from ..Product.views import ShowAllItems, ShowItem, add_to_cart, remove_from_cart, show_cart_items, remove_all_cart, \
     ShowItemByCategory
 
@@ -21,7 +22,8 @@ urlpatterns = [
                   path('product/<str:name_category>/', ShowItemByCategory.as_view(), name='item_by_category'),
                   path('user/loginPhone/', LoginPhoneView.as_view(), name='loginPhone_page'),
                   path('forgetPassword/', change_password, name='forget_password'),
-                  path('user/signup/verify/email/', verify_email_view, name='verify_email'),
+                  path('user/signup/verify/email/', verify_email_view, name='verify_email_view'),
+                  path('user/email/accepted', verify_code, name='verify_code'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL,
                                                                                            document_root=settings.
