@@ -17,6 +17,7 @@
                                 {% for image_url in product|product_images %}
                                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
                                         <img src="{{ image_url }}" class="d-block w-100 set-radiusus" alt="Product Image" height="500" width="500">
+                       
                                     </div>
                                 {% endfor %}
                                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">

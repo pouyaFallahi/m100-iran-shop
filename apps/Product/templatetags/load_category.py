@@ -5,8 +5,9 @@ from ..models import Category
 register = template.Library()
 
 
-@register.inclusion_tag('navbar.html')
-def navbar_categories():
+@register.filter
+def navbar_categories(categori):
     categories = Category.objects.all()
-    categories = {'categories': categories}
+    print('test')
+    print(categories)
     return categories

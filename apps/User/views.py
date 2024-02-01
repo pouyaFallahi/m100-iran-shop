@@ -1,16 +1,20 @@
-import json
-from random import randint
 from .models import User
-from django.urls import reverse_lazy
-from django.http import HttpResponse
+from random import randint
+from django.core import signing
+from django.utils import timezone
 from django.contrib import messages
-from .tasks import send_verification_email
+from ..main.models import OneTimeURL
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect, render
+from ..main.views import generate_one_time_url
 from django.contrib.auth.views import LoginView
-from django.views.generic import CreateView, View
+from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.decorators import login_required
+from django.views.generic import CreateView, View, FormView
+from .tasks import send_verification_email, send_email_for_change_password
+from django.contrib.auth import update_session_auth_hash, logout, login, authenticate, update_session_auth_hash
 from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm
 
 count_of_logout = {}
@@ -44,24 +48,6 @@ class LogingView(LoginView):
     success_url = reverse_lazy('home_page')
 
 
-def change_password(request):
-    if not request.user.is_authenticated:
-        if request.method == 'POST':
-            form = CustomPasswordChangeForm(request.user, request.POST)
-            if form.is_valid():
-                user = form.save()
-                update_session_auth_hash(request, user)  # نیاز است تا جلوی لاگ‌اوت از کاربر را بگیریم
-                messages.success(request, _('Password changed!'))
-                return redirect('login_page')
-            else:
-                messages.error(request, _('Please make the required corrections.'))
-        else:
-            form = CustomPasswordChangeForm(request.user)
-        return render(request, 'User/forget_password.html', {'form': form})
-    else:
-        return HttpResponse(_('You do not have permission to access this section.'))
-
-
 class LogOutView(View):
     def get(self, request):
         if self.request.user:
@@ -77,12 +63,14 @@ class LogOutView(View):
 
 class SignUpView(CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy('verify_email_view')
+    success_url = reverse_lazy('enter_code')
     template_name = 'User/signup.html'
 
     def form_valid(self, form):
+        sign = signing.TimestampSigner()
         response = super().form_valid(form)
         email = form.cleaned_data['email']  # Assuming the email field in the form is named 'email'
+        email = sign.sign_object(email)
         response.set_cookie('user_email', email)
         return response
 
@@ -95,11 +83,37 @@ user_code = create_code()
 
 
 def verify_email_view(request):
+    sig = signing.TimestampSigner()
     user_email = request.COOKIES.get('user_email')
+    user_email = sig.unsign_object(user_email)
     code = user_code
-    print(code)
+    print(code, user_email)
     send_verification_email.delay(user_email, code)
     return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': code})
+
+
+def change_password(request):
+    sign = signing.TimestampSigner()
+    user_email = request.COOKIES.get('user_email')
+    user_email = sign.unsign_object(user_email)
+    if user_email in User.email:
+        return HttpResponse('True')
+    else:
+        return HttpResponse('True')
+
+
+class ChangePassWord(FormView):
+    form_class = CustomPasswordChangeForm
+    success_url = reverse_lazy('change')
+    template_name = 'User/forget_password.html'
+
+    def form_valid(self, form):
+        sign = signing.TimestampSigner()
+        response = super().form_valid(form)
+        email = form.cleaned_data['email_fild']
+        send_email_for_change_password.delay(email)
+        email = sign.sign_object(email)
+        response.set_cookie('user_email', email)
 
 
 def verify_code(request):

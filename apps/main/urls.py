@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.urls import path
-from .views import carousel_view
+from django.urls import path
 from django.conf import settings
+from .views import carousel_view
 from django.conf.urls.static import static
-from ..User.views import LogingView, LogOutView, SignUpView, LoginPhoneView, change_password, verify_email_view, \
-    verify_code
+from ..User.views import LogingView, LogOutView, SignUpView, LoginPhoneView, verify_email_view, \
+    verify_code, ChangePassWord, change_password
 from ..Product.views import ShowAllItems, ShowItem, add_to_cart, remove_from_cart, show_cart_items, remove_all_cart, \
     ShowItemByCategory
+
 
 urlpatterns = [
                   path('', carousel_view, name='home_page'),
@@ -21,9 +23,10 @@ urlpatterns = [
                   path('product/remove_all_orders/', remove_all_cart, name='remove_all'),
                   path('product/<str:name_category>/', ShowItemByCategory.as_view(), name='item_by_category'),
                   path('user/loginPhone/', LoginPhoneView.as_view(), name='loginPhone_page'),
-                  path('forgetPassword/', change_password, name='forget_password'),
+                  path('forgetPassword/', ChangePassWord.as_view(), name='forget_password'),
                   path('user/signup/verify/email/', verify_email_view, name='verify_email_view'),
                   path('user/email/accepted', verify_code, name='verify_code'),
+                  path('change-password/<hash>', change_password, name='change')
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL,
                                                                                            document_root=settings.

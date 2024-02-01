@@ -59,7 +59,7 @@ class PhoneNumberLoginForm(forms.Form):
                'aria-label': 'Password'}))
 
 
-class CustomPasswordChangeForm(PasswordChangeForm):
+class CustomPasswordChangeForm(forms.Form):
     email_fild = forms.EmailField(label='email', widget=forms.EmailInput(
         attrs={'class': 'form-control form-control-lg', 'type': 'email', 'placeholder': _('Email'),
                'aria-label': 'Email'}))
@@ -71,3 +71,4 @@ class VerifyEmailForm(forms.Form):
                        'aria-label': 'code'}),
 
     )
+
