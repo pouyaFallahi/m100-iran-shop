@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 import json
-from django.contrib import messages
+from rest_framework import status
+from rest_framework import generics
 from .models import Product, Category
 from django.views.generic.base import View
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import ListView, DetailView
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext_lazy as _
-
+from rest_framework.mixins import ListModelMixin, UpdateModelMixin
 
 
 def get_product_by_id(product_id):
@@ -36,7 +40,7 @@ class ShowItem(DetailView):
 
 
 def get_cart_from_cookie(request):
-    cart_data = request.COOKIES.get('cart_data', '{}')
+    cart_data = request.COOKIES.get('item_cart', '{}')
     return json.loads(cart_data)
 
 
@@ -56,7 +60,6 @@ def add_product_to_cart(request, product_id, quantity=1):
             cart_data[str(product_id)] = quantity
         response = HttpResponse()
         response.set_cookie("cart_data", json.dumps(cart_data))
-        print(cart_data)
         return response
     else:
         return HttpResponse("The requested quantity is not available", status=400)
@@ -91,26 +94,43 @@ def remove_from_cart(request, product_id):
         return HttpResponse("The requested quantity is not available", status=400)
 
 
-def show_cart_items(request):
-    cart_data = get_cart_from_cookie(request)
-    order_list = []
-    for product_id, quantity in cart_data.items():
-        product = Product.objects.get(id=product_id)
-        order_list.append({
-            'product_id': product_id,
-            'product_name': product.name_product,
-            'quantity': quantity,
-            'price': product.price
-        })
-    return render(request, 'Product/list-of-orders.html', {'order_list': order_list})
-    # return JsonResponse(order_list, safe=False) => for json
+class ShowListOfOrders(UpdateModelMixin,ListModelMixin,generics.GenericAPIView):
+    
+
+
+# def show_cart_items(request : Request):
+# cart_data = get_cart_from_cookie(request)
+# order_list = []
+# for product_id, quantity in cart_data.items():
+#     product = Product.objects.get(id=product_id)
+#     order_list.append({
+#         'product_id': product_id,
+#         'product_name': product.name_product,
+#         'quantity': quantity,
+#         'price': product.price
+#     })
+# return render(request, 'Product/list-of-orders.html', {'order_list': order_list})
+# return JsonResponse(order_list, safe=False) => for json
+
+
+def product_search(request):
+    pass
+    # if request.method == 'get':
+    #     # form = SearchForm(request.GET)
+    #     if form.is_valid():
+    #         query = form.cleaned_data['query']
+    #         results = Product.objects.filter(name__icontains=query)
+    #         return render(request, 'Product/list-item.html', {'results': results, 'product': query})
+    # else:
+    #     form = SearchForm()
+    # return render(request, 'home-page.html', {'form': form})
 
 
 class ShowItemByCategory(View):
     model = Category
+
     def get(self, request, name_category):
         category = get_object_or_404(Category, name_category=name_category)
         print(category)
         products = Product.objects.filter(category=category)
         return render(request, 'Product/list-item.html', {'products': products})
-
