@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ block.super }}list-item {% endblock %}
+
+{% block content %}
+    <div class="shadow-lg p-3 mb-5 rounded m-5 secondary-color">
+    <h2 class="text-center ">همه محصولات</h2>
+    <hr>
+
+    {% include 'Product/item-cart.html' %}
+    </div>
+
+{% endblock %}
+ 
+    

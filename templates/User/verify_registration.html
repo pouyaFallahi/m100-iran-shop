@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ block.super }} {{ _('تایید ایمیل') }} {% endblock %}
+
+{% block content %}
+    <div class="container">
+      <h2 style="margin-top: 10px">
+            {{ _('ارسال ایمیل تایید از پشتیبانی') }}
+      </h2>
+      <form method="POST" action="{% url 'verify_code' %}">
+        {% csrf_token %}
+        {{ form.code }}
+
+        <a>{{ message }}</a>
+            <button  type="submit" class="btn btn-success">{{ _('تایید کردن') }}</button>
+
+      </form>
+    </div>
+{% endblock %}

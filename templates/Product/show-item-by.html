@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ block.super }} show item by {{ product.category }} {% endblock %}
+
+
+{% block content %}
+    {% if product.category %}
+
+        {% include 'Product/item-cart.html' %}
+        
+    {% else %}
+        <h1>محصولی یافت نشد</h1>    
+    
+    {% endif %}
+
+{% endblock %}
