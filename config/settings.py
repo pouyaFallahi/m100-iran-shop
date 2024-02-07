@@ -20,11 +20,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    #rest_framework
+    'rest_framework',
+
     #my_apps
     'apps.User',
     'apps.main',
     'apps.Product',
-    'django_celery_results'
+    'apps.cart',
+    
+    #celery
+    'django_celery_results',
+
 ]
 
 MIDDLEWARE = [
@@ -56,7 +63,6 @@ TEMPLATES = [
         },
     },
 ]
-
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
@@ -86,6 +92,13 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Django rest framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication'
+    ]
+}
 
 # User_model
 AUTH_USER_MODEL = 'User.User'
