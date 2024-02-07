@@ -5,7 +5,7 @@ from .models import CarouselImg
 from django.utils import timezone
 from django.shortcuts import render
 from django.http import JsonResponse
-from ..Product.models import Category
+from ..Product.models import Category, Product
 from django.views.generic import ListView
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -42,3 +42,6 @@ def use_one_time_url(request, url_id):
         return JsonResponse({'success': 'URL used successfully'}, status=200)
     else:
         return JsonResponse({'error': 'URL is not valid or expired'}, status=400)
+
+
+
