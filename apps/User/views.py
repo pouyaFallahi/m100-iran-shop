@@ -12,10 +12,10 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView, View, FormView
+from django.views.generic import CreateView, View, FormView, DetailView, UpdateView
 from .tasks import send_verification_email, send_email_for_change_password
 from django.contrib.auth import update_session_auth_hash, logout, login, authenticate, update_session_auth_hash
-from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm
+from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm, EditUserForm
 
 count_of_logout = {}
 
@@ -130,3 +130,27 @@ def verify_code(request):
             return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
     else:
         return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
+
+
+class ShowCustomersView(DetailView):
+    model = User
+    template_name = 'User/customers.html'
+    
+
+    def get(self, requset, *args, **kwargs):
+        user = requset.user
+        if user.is_authenticated:
+            if kwargs['pk'] == user.id:
+                return super().get(requset, *args, **kwargs)
+            else:
+                return redirect('home_page')
+
+        else:
+            return redirect('home_page')
+
+
+class EditProfileView(UpdateView):
+    model = User
+    form_class = EditUserForm
+    template_name = 'User/edit-file.html'
+    success_url = reverse_lazy('home_page')

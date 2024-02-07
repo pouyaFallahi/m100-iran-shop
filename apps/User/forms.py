@@ -72,3 +72,22 @@ class VerifyEmailForm(forms.Form):
 
     )
 
+
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'phone_number', 'address']
+        widgets = {
+            'full_name': forms.TextInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Full Name'),
+                       'aria-label': 'Full Name'}),
+            'email': forms.EmailInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'email', 'placeholder': _('Email'),
+                       'aria-label': 'Email'}),
+            'phone_number': forms.TextInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Phone Number'),
+                       'aria-label': 'Phone Number'}),
+            'address': forms.TextInput(
+                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Address'),
+                       'aria-label': 'Address'}),
+        }
