@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ block.super }} - Orders{% endblock %}
+{% block title %}{{ block.super }} - {{ _('لیست سفارشات') }}{% endblock %}
 
 {% block content %}
     {% if order_list is not None %}
@@ -8,10 +8,10 @@
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Product Name</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col">Price</th>
+                    <th scope="col">{{ _('ردیف') }}</th>
+                    <th scope="col">{{ _('نام محصول') }}</th>
+                    <th scope="col">{{ _('تعداد') }}</th>
+                    <th scope="col">{{ _('قیمت') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,7 +28,7 @@
                 {% endfor %}
                 {% endwith %}
                 <tr>
-                    <td colspan="3"><strong>Total Price:</strong></td>
+                    <td colspan="3"><strong>{{ _('جمع کل') }}</strong></td>
                     <td>${{ total_price|floatformat:2 }}</td>
                 </tr>
             </tbody>
