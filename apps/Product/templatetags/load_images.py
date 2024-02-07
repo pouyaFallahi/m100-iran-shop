@@ -16,7 +16,6 @@ def product_image(product):
 
 @register.filter
 def product_images(product):
-    print('product_images')
     # یک لیست از آدرس‌های تصاویر محصول بسازید
     images = product.image.all()
     for image in images:
