@@ -94,8 +94,6 @@ def remove_from_cart(request, product_id):
         return HttpResponse("The requested quantity is not available", status=400)
 
 
-class ShowListOfOrders(UpdateModelMixin,ListModelMixin,generics.GenericAPIView):
-    
 
 
 # def show_cart_items(request : Request):

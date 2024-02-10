@@ -1,4 +1,5 @@
 import json
+from django.shortcuts import render
 from ..Product.models import Product
 from .models import CartItem
 from rest_framework import status
@@ -53,12 +54,19 @@ def add_remove_item_cart_to_cookie(request: Request, pk):
                 Response(None, status=status.HTTP_204_NO_CONTENT)
 
 
-class ProductCartAPIView(ListModelMixin, CreateModelMixin, generics.GenericAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+def get_cart_from_cookie(request):
+    cart_data = request.COOKIES.get('item_cart', '{}')
+    return json.loads(cart_data)
 
-    def get(self, request: Request):
-        return self.list(request)
 
-    def post(self, request: Request):
-        return self.create(request)
+def show(request):
+    return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from cart.')})
+
+
+class ProcessCookieView(APIView):
+    def post(self, request):
+        cookies = request.COOKIES
+        pk = cookies.get('pk')
+        order_count = cookies.get('order_count')
+        print(f'this is test:\n{pk}, {order_count}, {cookies}')
+        return Response({'status': 'Cookies processed successfully'})
