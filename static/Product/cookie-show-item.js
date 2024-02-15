@@ -1,47 +1,30 @@
-// Function to get the value of the "item_cart" cookie
 function getItemCartCookie() {
-    var cookies = document.cookie; // Get the cookie string
-    var cookieArray = cookies.split(';'); // Split the string into an array of individual cookies
+    const cookies = document.cookie.split('; ')
+    for (const cookie of cookies){
+        const [name, value] = cookie.split('=')
+        if  (name == "item_cart"){
+            const keyValuePairs = value.split(';')
+            const cartValue = {};
+            for (const pair of keyValuePairs) {
+                const [key, val] = pair.split('=')
+                cartValue[key] = val;
 
-    var itemCartValue = null; // Initialize variable to store the value of the "item_cart" cookie
+            }
+            return cartValue
 
-    // Loop through the array of cookies
-    cookieArray.forEach(function (cookie) {
-        var parts = cookie.split('='); // Split each cookie into its name and value
-        var name = parts[0].trim(); // Get the name of the cookie and remove leading/trailing whitespace
-
-        // Check if the cookie is "item_cart"
-        if (name === 'item_cart') {
-            itemCartValue = parts[1]; // Get the value of the "item_cart" cookie
         }
-    });
 
-    return itemCartValue; // Return the value of the "item_cart" cookie
+    }
 }
 
-function readCookie() {
-    const csrftoken = document.qurySelector('[name=csrfmiddlewaretoken]').value;
+function sendToServer() {
+    var xhr = new XMLHttpRequest();
+    var cookieItem = getItemCartCookie()
 
-    const itemCartValue = getItemCartCookie();
-
-    const url = '/product-list/api/'
-
-    const requestData = {
-        mehod : 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JOSN.stringify({})
-    };
-    fetch(url, requestData).then(response => {
-        if (response.status == 200) {
-            console.log('item add to cookies successfully');
-            itemCartValue.forEach(
-                (item) => {
-                    console.log(item);
-                }
-            )
-        }
-    })
+    xhr.open("POST", "http://127.0.0.1:8000/product-list/api/", true);
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    xhr.send(cookieItem)
 }
+
+
+sendToServer()

@@ -1,37 +1,20 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ block.super }} - {{ _('لیست سفارشات') }}{% endblock %}
 
 {% block content %}
     <table id="cookieTable">
-    <tr>
-        <th>Name</th>
-        <th>Value</th>
-    </tr>
-</table>
-
-<script>
-  $(document).ready(function() {
-        // Function to send cookies to the server and handle the response
-        function sendCookiesToServer() {
-            var cookies = document.cookie;
-            $.ajax({
-                url: 'http://127.0.0.1:8000/product/api/', // Replace with your server endpoint
-                type: 'GET',
-                data: { cookies: cookies },
-                success: function(response) {
-                    // Handle the response from the server
-                    console.log('Response from server:', response);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                }
-            });
-        }
-
-        // Call the function to send cookies to the server when the page loads
-        sendCookiesToServer();
-    });
-</script>
-
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+        </tr>
+    </table>
+    <div id="DOMContentLoaded">
+        
+    </div>
+{% endblock %}
+    
+{% block script %}
+<script src="{% static 'Product/cookie-show-item.js' %}"></script>
 {% endblock %}

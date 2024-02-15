@@ -17,11 +17,9 @@ function addRemoveToCart(pk) {
         .then(response => {
             if (response.status == 201) {
                 console.log('item add to cookies successfully');
-            }
-            else if (response.status == 400){
+            } else if (response.status == 400) {
                 alert('این محصول دیگه بیشتر از این موجود نیست');
-            }
-            else {
+            } else {
                 console.error('ERROR in POST:', response.statusText);
             }
         })
@@ -42,18 +40,15 @@ function removeFromCart(pk) {
             'X-CSRFToken': csrftoken
         },
         body: JSON.stringify({})
-    } ;
+    };
 
     fetch(url, requestData)
         .then(response => {
             if (response.status == 204) {
                 console.log('item remove from cookies successfully');
-            }
-            else if (response.status == 500){
+            } else if (response.status == 500) {
                 alert('مقدار سفارشی صفر است!!');
-            }
-
-            else {
+            } else {
                 console.error('ERROR in DELETE:', response.statusText);
             }
         })
