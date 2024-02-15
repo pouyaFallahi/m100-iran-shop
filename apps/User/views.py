@@ -6,16 +6,21 @@ from django.contrib import messages
 from ..main.models import OneTimeURL
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect, render
+from rest_framework.response import Response
 from ..main.views import generate_one_time_url
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import PasswordChangeForm
+from .serializers import UserSerializer
+from rest_framework.request import Request
 from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView, View, FormView, DetailView, UpdateView
 from .tasks import send_verification_email, send_email_for_change_password
 from django.contrib.auth import update_session_auth_hash, logout, login, authenticate, update_session_auth_hash
-from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm, EditUserForm
+from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm, \
+    EditUserForm
+from rest_framework.decorators import api_view
 
 count_of_logout = {}
 
@@ -132,21 +137,32 @@ def verify_code(request):
         return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
 
 
+@api_view(['GET', 'PUT'])
+def show_customers_api_view(request: Request, pk):
+    if request.method == 'GET':
+        user = User.objects.get(pk=pk)
+        user_serializer = UserSerializer(user)
+        return Response(user_serializer.data)
+
+    if request.method == 'PUT':
+        pass
+
+
 class ShowCustomersView(DetailView):
     model = User
     template_name = 'User/customers.html'
-    
 
-    def get(self, requset, *args, **kwargs):
-        user = requset.user
-        if user.is_authenticated:
-            if kwargs['pk'] == user.id:
-                return super().get(requset, *args, **kwargs)
-            else:
-                return redirect('home_page')
 
+def get(self, requset, *args, **kwargs):
+    user = requset.user
+    if user.is_authenticated:
+        if kwargs['pk'] == user.id:
+            return super().get(requset, *args, **kwargs)
         else:
             return redirect('home_page')
+
+    else:
+        return redirect('home_page')
 
 
 class EditProfileView(UpdateView):
