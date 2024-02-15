@@ -14,6 +14,8 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework import status
 
 
+
+
 @api_view(['GET', 'POST', 'DELETE'])
 def add_remove_item_cart_to_cookie(request: Request, pk):
     if request.method == 'GET':
@@ -55,18 +57,14 @@ def add_remove_item_cart_to_cookie(request: Request, pk):
 
 
 def get_cart_from_cookie(request):
-    cart_data = request.COOKIES.get('item_cart', '{}')
+    cart_data = request.cookie.get('item_cart', '{}')
     return json.loads(cart_data)
 
 
 def show(request):
+    cart_data = request
+    print(f'data is: {cart_data}')
     return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from cart.')})
 
 
-class ProcessCookieView(APIView):
-    def post(self, request):
-        cookies = request.COOKIES
-        pk = cookies.get('pk')
-        order_count = cookies.get('order_count')
-        print(f'this is test:\n{pk}, {order_count}, {cookies}')
-        return Response({'status': 'Cookies processed successfully'})
+
