@@ -91,3 +91,6 @@ class EditUserForm(forms.ModelForm):
                 attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Address'),
                        'aria-label': 'Address'}),
         }
+
+
+

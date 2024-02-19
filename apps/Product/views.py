@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from rest_framework import status
+from .forms import FormSearchItem
 from rest_framework import generics
 from .models import Product, Category
 from django.views.generic.base import View
@@ -21,9 +22,10 @@ def get_product_by_id(product_id):
 class ShowAllItems(ListView):
     def get(self, request, *args, **kwargs):
         product = Product.objects.all()
+        category = Category.objects.all()
 
         if request.headers.get('Accept') == 'application/json':
-            data = {'product': list(product.values())}
+            data = {'product': list(product.values()), 'category': list(category.values())}
             return JsonResponse(data)
         else:
             return render(request, 'Product/list-item.html', {'products': product})
@@ -39,63 +41,80 @@ class ShowItem(DetailView):
         return product
 
 
-def get_cart_from_cookie(request):
-    cart_data = request.COOKIES.get('item_cart', '{}')
-    return json.loads(cart_data)
+class ProductSearch(ListView):
+        def get(self, request):
+            product = Product.objects.all()
+            search_item = request.GET.get('q')
+            if product == search_item:
+                print('oky')
+            return HttpResponse
 
 
-def add_product_to_cart(request, product_id, quantity=1):
-    item_in_db = Product.objects.get(id=product_id)
-    cart_data = get_cart_from_cookie(request)
+class ShowItemByCategory(View):
+    model = Category
 
-    if str(product_id) in cart_data:
-        total_quantity = cart_data[str(product_id)] + quantity
-    else:
-        total_quantity = quantity
+    def get(self, request, name_category):
+        category = get_object_or_404(Category, name_category=name_category)
+        print(category)
+        products = Product.objects.filter(category=category)
+        return render(request, 'Product/list-item.html', {'products': products})
 
-    if item_in_db.many >= total_quantity:  # Check if the available quantity is sufficient
-        if str(product_id) in cart_data:
-            cart_data[str(product_id)] += quantity
-        else:
-            cart_data[str(product_id)] = quantity
-        response = HttpResponse()
-        response.set_cookie("cart_data", json.dumps(cart_data))
-        return response
-    else:
-        return HttpResponse("The requested quantity is not available", status=400)
-
-
-def add_to_cart(request, product_id):
-    return add_product_to_cart(request, product_id)
-
-
-def remove_all_cart(request):
-    response = HttpResponse()
-    response.delete_cookie("cart_data")
-    return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from cart.')})
-
-
-def remove_from_cart(request, product_id):
-    item_in_db = Product.objects.get(id=product_id)
-    cart_data = get_cart_from_cookie(request)
-
-    if item_in_db.many >= 0:
-        if str(product_id) in cart_data:
-            if cart_data[str(product_id)] > 1:
-                cart_data[str(product_id)] -= 1  # Decrement the quantity by 1
-            else:
-                del cart_data[str(product_id)]  # Remove the product if the quantity is 1
-            response = HttpResponse()
-            response.set_cookie("cart_data", json.dumps(cart_data))
-            return response
-        else:
-            return HttpResponse("The requested quantity is not available", status=400)
-    else:
-        return HttpResponse("The requested quantity is not available", status=400)
-
-
-
-
+# some def
+# def get_cart_from_cookie(request):
+#     cart_data = request.COOKIES.get('item_cart', '{}')
+#     return json.loads(cart_data)
+# def add_product_to_cart(request, product_id, quantity=1):
+#     item_in_db = Product.objects.get(id=product_id)
+#     cart_data = get_cart_from_cookie(request)
+#
+#     if str(product_id) in cart_data:
+#         total_quantity = cart_data[str(product_id)] + quantity
+#     else:
+#         total_quantity = quantity
+#
+#     if item_in_db.many >= total_quantity:  # Check if the available quantity is sufficient
+#         if str(product_id) in cart_data:
+#             cart_data[str(product_id)] += quantity
+#         else:
+#             cart_data[str(product_id)] = quantity
+#         response = HttpResponse()
+#         response.set_cookie("cart_data", json.dumps(cart_data))
+#         return response
+#     else:
+#         return HttpResponse("The requested quantity is not available", status=400)
+#
+#
+# def add_to_cart(request, product_id):
+#     return add_product_to_cart(request, product_id)
+#
+#
+# def remove_all_cart(request):
+#     response = HttpResponse()
+#     response.delete_cookie("cart_data")
+#     return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from cart.')})
+#
+#
+# def remove_from_cart(request, product_id):
+#     item_in_db = Product.objects.get(id=product_id)
+#     cart_data = get_cart_from_cookie(request)
+#
+#     if item_in_db.many >= 0:
+#         if str(product_id) in cart_data:
+#             if cart_data[str(product_id)] > 1:
+#                 cart_data[str(product_id)] -= 1  # Decrement the quantity by 1
+#             else:
+#                 del cart_data[str(product_id)]  # Remove the product if the quantity is 1
+#             response = HttpResponse()
+#             response.set_cookie("cart_data", json.dumps(cart_data))
+#             return response
+#         else:
+#             return HttpResponse("The requested quantity is not available", status=400)
+#     else:
+#         return HttpResponse("The requested quantity is not available", status=400)
+#
+#
+#
+#
 # def show_cart_items(request : Request):
 # cart_data = get_cart_from_cookie(request)
 # order_list = []
@@ -109,26 +128,3 @@ def remove_from_cart(request, product_id):
 #     })
 # return render(request, 'Product/list-of-orders.html', {'order_list': order_list})
 # return JsonResponse(order_list, safe=False) => for json
-
-
-def product_search(request):
-    pass
-    # if request.method == 'get':
-    #     # form = SearchForm(request.GET)
-    #     if form.is_valid():
-    #         query = form.cleaned_data['query']
-    #         results = Product.objects.filter(name__icontains=query)
-    #         return render(request, 'Product/list-item.html', {'results': results, 'product': query})
-    # else:
-    #     form = SearchForm()
-    # return render(request, 'home-page.html', {'form': form})
-
-
-class ShowItemByCategory(View):
-    model = Category
-
-    def get(self, request, name_category):
-        category = get_object_or_404(Category, name_category=name_category)
-        print(category)
-        products = Product.objects.filter(category=category)
-        return render(request, 'Product/list-item.html', {'products': products})

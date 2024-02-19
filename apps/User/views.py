@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import PasswordChangeForm
 from .serializers import UserSerializer
 from rest_framework.request import Request
+from rest_framework import status
 from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView, View, FormView, DetailView, UpdateView
 from .tasks import send_verification_email, send_email_for_change_password
@@ -21,6 +22,7 @@ from django.contrib.auth import update_session_auth_hash, logout, login, authent
 from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm, \
     EditUserForm
 from rest_framework.decorators import api_view
+from rest_framework import mixins
 
 count_of_logout = {}
 
@@ -139,13 +141,22 @@ def verify_code(request):
 
 @api_view(['GET', 'PUT'])
 def show_customers_api_view(request: Request, pk):
-    if request.method == 'GET':
+    try:
         user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
         user_serializer = UserSerializer(user)
         return Response(user_serializer.data)
 
     if request.method == 'PUT':
-        pass
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ShowCustomersView(DetailView):
