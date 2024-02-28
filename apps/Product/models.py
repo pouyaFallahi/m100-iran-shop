@@ -1,8 +1,9 @@
 from django.db import models
+from ..Main.models import GeneralManager
 from django.utils.safestring import mark_safe
 
 
-class ImageForProduct(models.Model):
+class ImageForProduct(GeneralManager):
     image = models.ImageField(upload_to='Product/')
     description = models.CharField(max_length=254)
 
@@ -13,7 +14,7 @@ class ImageForProduct(models.Model):
         return f'{self.id} {self.description}'
 
 
-class Category(models.Model):
+class Category(GeneralManager):
     name_category = models.CharField(max_length=254, blank=True, null=True)
     parent_category = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
@@ -21,7 +22,8 @@ class Category(models.Model):
         return self.name_category
 
 
-class Company(models.Model):
+
+class Company(GeneralManager):
     company_name = models.CharField(max_length=254, blank=True, null=True)
     details = models.TextField()
     email = models.EmailField()
@@ -30,9 +32,9 @@ class Company(models.Model):
         return self.company_name
 
 
-class Product(models.Model):
+class Product(GeneralManager):
     name_product = models.CharField(max_length=255, blank=True, null=True)
-    image = models.ManyToManyField(ImageForProduct, blank=True, null=True)
+    image = models.ManyToManyField(ImageForProduct, blank=True)
     details = models.TextField()
     price = models.IntegerField()
     many = models.IntegerField()

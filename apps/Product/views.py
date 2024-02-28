@@ -20,15 +20,19 @@ def get_product_by_id(product_id):
 
 
 class ShowAllItems(ListView):
-    def get(self, request, *args, **kwargs):
-        product = Product.objects.all()
-        category = Category.objects.all()
-
-        if request.headers.get('Accept') == 'application/json':
-            data = {'product': list(product.values()), 'category': list(category.values())}
-            return JsonResponse(data)
-        else:
-            return render(request, 'Product/list-item.html', {'products': product})
+    paginate_by = 4
+    model = Product
+    template_name = "Product/list-item.html"
+    context_object_name = 'products'
+    # def get(self, request, *args, **kwargs):
+    #     product = Product.objects.all()
+    #     category = Category.objects.all()
+    #
+    #     if request.headers.get('Accept') == 'application/json':
+    #         data = {'product': list(product.values()), 'category': list(category.values())}
+    #         return JsonResponse(data)
+    #     else:
+    #         return render(request, 'Product/list-item.html', {'products': product})
 
 
 class ShowItem(DetailView):
@@ -91,7 +95,7 @@ class ShowItemByCategory(View):
 # def remove_all_cart(request):
 #     response = HttpResponse()
 #     response.delete_cookie("cart_data")
-#     return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from cart.')})
+#     return render(request, 'Product/list-of-orders.html', context={'message': _('All items removed from Cart.')})
 #
 #
 # def remove_from_cart(request, product_id):
