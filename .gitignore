@@ -156,3 +156,5 @@ cython_debug/.# PyCharm
 .idea
 */migrations/
 final_project_100.pdf
+
+images
