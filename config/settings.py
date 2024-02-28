@@ -25,9 +25,9 @@ INSTALLED_APPS = [
 
     #my_apps
     'apps.User',
-    'apps.main',
+    'apps.Main',
     'apps.Product',
-    'apps.cart',
+    'apps.Cart',
     
     #celery
     'django_celery_results',
