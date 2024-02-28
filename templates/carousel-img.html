@@ -1,5 +1,6 @@
 <div id="carouselExampleFade" class="carousel slide carousel-fade">
   <div class="carousel-inner">
+  {% if carousel_img %}
       {% for img in carousel_img %}
 
             <div class="carousel-item {% if forloop.first %} active {% endif %}">
@@ -7,6 +8,9 @@
             </div>
 
       {% endfor %}
+  {% else %}
+        <h2> {{ _('عکس را از پنل دمین آپلود کنید') }}</h2>
+  {% endif %}
   </div>
   <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>

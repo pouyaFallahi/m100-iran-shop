@@ -1,17 +1,28 @@
-{%  extends 'base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %} {{ block.super}} {{ _('صفحه اصلی') }} {% endblock %}
+{% block title %} {{ block.super }} {{ _('صفحه اصلی') }} {% endblock %}
 
 {% block content %}
-    <div class="container text-center">
-  <div class="row">
-    <div class="col-2">
+{#    {% if messages %}#}
+{#        <div class="container text-center">#}
+{#            <a style="color: red"> {{ messages }}</a>#}
+{#        </div>#}
 
+{#    {% endif %}#}
+    
+    <div class="container text-center">
+        <div class="row m-5">
+            <div class="col-12">
+                {% include 'carousel-img.html' %}
+            </div>
+        </div>
+
+        <div class="row m-5">
+            <div class="col-2">
+                <img class="image-main" src="{% static '33pole-esfahan.jpg' %}" width="500px" height="500px">
+            </div>
+        </div>
     </div>
-    <div class="col-10">
-          {% include 'carousel-img.html' %}
-    </div>
-  </div>
-</div>
 
 {% endblock %}
