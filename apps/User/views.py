@@ -1,28 +1,23 @@
-from .models import User
 from random import randint
 from django.core import signing
-from django.utils import timezone
-from django.contrib import messages
-from ..main.models import OneTimeURL
-from django.urls import reverse_lazy, reverse
-from django.shortcuts import redirect, render
-from rest_framework.response import Response
-from ..main.views import generate_one_time_url
-from django.contrib.auth.views import LoginView
-from django.http import HttpResponse, JsonResponse
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.forms import PasswordChangeForm
-from .serializers import UserSerializer
-from rest_framework.request import Request
 from rest_framework import status
-from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView, View, FormView, DetailView, UpdateView
-from .tasks import send_verification_email, send_email_for_change_password
-from django.contrib.auth import update_session_auth_hash, logout, login, authenticate, update_session_auth_hash
-from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm, \
-    EditUserForm
+from django.http import HttpResponse
+from django.urls import reverse_lazy
+from .serializers import UserSerializer
+from .models import User, PasswordReset
+from rest_framework.request import Request
+from rest_framework.response import Response
+from django.shortcuts import redirect, render
 from rest_framework.decorators import api_view
-from rest_framework import mixins
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.views import LoginView
+from django.utils.crypto import get_random_string
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import logout, login, authenticate
+from .tasks import send_verification_email, send_email_for_change_password
+from django.views.generic import CreateView, View, FormView, DetailView, UpdateView
+from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, VerifyEmailForm, EditUserForm, \
+    ChangePasswordForm
 
 count_of_logout = {}
 
@@ -54,6 +49,11 @@ class LogingView(LoginView):
     template_name = 'User/login.html'
     success_url = reverse_lazy('home_page')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['messages'] = "wellcome"
+        return context
+
 
 class LogOutView(View):
     def get(self, request):
@@ -62,7 +62,7 @@ class LogOutView(View):
             count_of_logout[user_login] = count_of_logout.get(user_login, 0) + 1
             logout(request)
             response = redirect('home_page')
-            response.set_cookie('latest_user_login', user_login)
+            # response.set_cookie('latest_user_login', user_login)
             response.set_cookie('count_of_logout', count_of_logout[user_login])
             response.delete_cookie('cart_data')
             return response
@@ -70,7 +70,7 @@ class LogOutView(View):
 
 class SignUpView(CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy('enter_code')
+    success_url = reverse_lazy('verify_email_view')
     template_name = 'User/signup.html'
 
     def form_valid(self, form):
@@ -94,33 +94,79 @@ def verify_email_view(request):
     user_email = request.COOKIES.get('user_email')
     user_email = sig.unsign_object(user_email)
     code = user_code
-    print(code, user_email)
     send_verification_email.delay(user_email, code)
     return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': code})
 
 
 def change_password(request):
-    sign = signing.TimestampSigner()
-    user_email = request.COOKIES.get('user_email')
-    user_email = sign.unsign_object(user_email)
-    if user_email in User.email:
-        return HttpResponse('True')
-    else:
-        return HttpResponse('True')
+    try:
+        sign = signing.TimestampSigner()
+        user_email = request.COOKIES.get('user_email')
+        user_email = sign.unsign_object(user_email)
+        if User.objects.get(email=user_email):
+            return HttpResponse('True')
+    except User.DoesNotExist:
+        return HttpResponse('False')
 
 
 class ChangePassWord(FormView):
     form_class = CustomPasswordChangeForm
-    success_url = reverse_lazy('change')
+    success_url = reverse_lazy('email_send')
     template_name = 'User/forget_password.html'
 
-    def form_valid(self, form):
-        sign = signing.TimestampSigner()
-        response = super().form_valid(form)
-        email = form.cleaned_data['email_fild']
-        send_email_for_change_password.delay(email)
-        email = sign.sign_object(email)
-        response.set_cookie('user_email', email)
+    def post(self, request, *args, **kwargs):
+        user = User()
+        if user.is_anonymous:
+            return render(request, 'User/no_access.html')
+        else:
+            sign = signing.TimestampSigner()  # This method is used to hash email
+            form = self.get_form()
+            if form.is_valid():
+                email = form.cleaned_data['email_fild']
+                print(email)
+                user = User.objects.filter(email=email).first()
+                if user:
+                    token = get_random_string(length=32)
+                    password_reset = PasswordReset.objects.create(user=user, token=token)
+                    password_reset.save()
+                    reset_link = request.build_absolute_uri('/') + f'password_reset/{token}/'
+                    send_email_for_change_password.delay(email, reset_link)
+                    return redirect('home_page')
+            else:
+                return self.form_invalid(form)
+
+
+def reset_password(request, token):
+    if request.method == 'POST':
+        password_reset = PasswordReset.objects.filter(token=token, is_active=True).first()
+        if password_reset:
+            user = User.objects.get(email=password_reset.user.email)
+            new_password = request.POST.get('password')  # دریافت رمز عبور جدید از فرم
+
+            # تغییر رمز عبور کاربر
+            user.set_password(new_password)
+            user.save()
+
+            # غیرفعال کردن کد فعال‌سازی
+            password_reset.is_active = False
+            password_reset.save()
+
+    return render(request, 'User/forget_password_form.html', context={'form': ChangePasswordForm})
+
+
+def email_send(request):
+    if request.COOKIES.get('user_email'):
+        sign = signing.TimestampSigner()  # This method is used to hash email
+        email = request.COOKIES.get('user_email')
+        email = sign.unsign_object(email)
+        user_email = User.objects.filter(email=email)
+        for emails in user_email:
+            if email == emails.email:
+                return render(request, 'User/Email_send.html', {'messages': _('check your mail')})
+        else:
+            return render(request, 'User/Email_send.html', {'messages': _('No such email was found')})
+    else:
+        return render(request, 'User/Email_send.html', {'messages': _('no access')})
 
 
 def verify_code(request):
@@ -129,14 +175,20 @@ def verify_code(request):
         if form.is_valid():
             code = form.cleaned_data['code']
             if code == user_code:
-                return redirect('login_page')
+                sig = signing.TimestampSigner()
+                user_email = request.COOKIES.get('user_email')
+                user_email = sig.unsign_object(user_email)
+                user = get_object_or_404(User, email=user_email)
+                user.is_active = True
+                user.save()
+                return render(request, 'home-page.html', {'messages': _('You have successfully registered')})
             else:
                 return render(request, 'User/verify_registration.html',
                               {'form': VerifyEmailForm, 'code': code, 'message': 'code is not correct'})
         else:
-            return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
+            return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': create_code()})
     else:
-        return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': 123456})
+        return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': create_code()})
 
 
 @api_view(['GET', 'PUT'])
@@ -158,22 +210,20 @@ def show_customers_api_view(request: Request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class ShowCustomersView(DetailView):
     model = User
     template_name = 'User/customers.html'
 
+    def get(self, requset, *args, **kwargs):
+        user = requset.user
+        if user.is_authenticated:
+            if kwargs['pk'] == user.id:
+                return super().get(requset, *args, **kwargs)
+            else:
+                return redirect('home_page')
 
-def get(self, requset, *args, **kwargs):
-    user = requset.user
-    if user.is_authenticated:
-        if kwargs['pk'] == user.id:
-            return super().get(requset, *args, **kwargs)
         else:
             return redirect('home_page')
-
-    else:
-        return redirect('home_page')
 
 
 class EditProfileView(UpdateView):

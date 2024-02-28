@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user
 from django.utils.translation import gettext_lazy as _
+from ..Main.models import GeneralManager
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 
@@ -33,7 +34,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser):
+class User(AbstractUser, GeneralManager):
     full_name = models.CharField(_('full name'), max_length=256, blank=True, null=True)
     email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
     phone_number = models.CharField(_('phone number'), max_length=11, blank=True, null=True)
@@ -46,4 +47,11 @@ class User(AbstractUser):
     objects = UserManager()
 
     def __str__(self):
-        return f'{self.full_name}'
+        return f'{self.username}'
+
+
+class PasswordReset(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)

@@ -67,10 +67,10 @@ class CustomPasswordChangeForm(forms.Form):
 
 class VerifyEmailForm(forms.Form):
     code = forms.CharField(label='code', widget=forms.EmailInput(
-                attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Code'),
-                       'aria-label': 'code'}),
+        attrs={'class': 'form-control form-control-lg', 'type': 'text', 'placeholder': _('Code'),
+               'aria-label': 'code'}),
 
-    )
+                           )
 
 
 class EditUserForm(forms.ModelForm):
@@ -93,4 +93,9 @@ class EditUserForm(forms.ModelForm):
         }
 
 
+class ChangePasswordForm(forms.Form):
+    password = forms.CharField(widget= forms.PasswordInput(attrs={'class': 'form-control form-control-lg', 'type': 'password', 'placeholder': _('Password'),
+                       'aria-label': 'Password'}),)
+    re_password = forms.CharField(widget= forms.PasswordInput(attrs={'class': 'form-control form-control-lg', 'type': 'password', 'placeholder': _('Re-Password'),
+                       'aria-label': 'Re-Password'}),)
 
