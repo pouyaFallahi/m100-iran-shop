@@ -1,14 +1,11 @@
-# استفاده از تصویر پایتون رسمی به عنوان پایه
-FROM python
+FROM python:3.11.4-slim-buster
+WORKDIR GW-iran-shop
 
-# تنظیم محل کار در کانتینر
-WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# کپی فایل‌های مورد نیاز برای نصب وابستگی‌ها
-COPY requirements.txt /app/
+RUN pip install --upgrade pip
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# نصب وابستگی‌های پروژه
-RUN pip install --no-cache-dir -r requirements.txt
-
-# کپی سایر فایل‌ها به کانتینر
-COPY . /app/
+COPY . .
