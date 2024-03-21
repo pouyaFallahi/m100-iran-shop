@@ -1,23 +1,30 @@
+from .models import User, PasswordReset
 from random import randint
 from django.core import signing
-from rest_framework import status
-from django.http import HttpResponse
-from django.urls import reverse_lazy
-from .serializers import UserSerializer
-from .models import User, PasswordReset
-from rest_framework.request import Request
-from rest_framework.response import Response
+from django.utils import timezone
+from django.contrib import messages
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect, render
-from rest_framework.decorators import api_view
-from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from ..Main.views import generate_one_time_url
 from django.contrib.auth.views import LoginView
-from django.utils.crypto import get_random_string
+from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import logout, login, authenticate
-from .tasks import send_verification_email, send_email_for_change_password
+from django.contrib.auth.forms import PasswordChangeForm
+from .serializers import UserSerializer
+from rest_framework.request import Request
+from rest_framework import status
+from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView, View, FormView, DetailView, UpdateView
-from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, VerifyEmailForm, EditUserForm, \
-    ChangePasswordForm
+from .tasks import send_verification_email, send_email_for_change_password
+from django.contrib.auth import update_session_auth_hash, logout, login, authenticate, update_session_auth_hash
+from .forms import CustomPasswordChangeForm, SignUpForm, PhoneNumberLoginForm, SubscribeForm, VerifyEmailForm, \
+    EditUserForm
+from rest_framework.decorators import api_view
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+
+from rest_framework import mixins
 
 count_of_logout = {}
 
@@ -48,11 +55,6 @@ class LoginPhoneView(View):
 class LogingView(LoginView):
     template_name = 'User/login.html'
     success_url = reverse_lazy('home_page')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['messages'] = "wellcome"
-        return context
 
 
 class LogOutView(View):
@@ -94,6 +96,7 @@ def verify_email_view(request):
     user_email = request.COOKIES.get('user_email')
     user_email = sig.unsign_object(user_email)
     code = user_code
+    print(code, user_email)
     send_verification_email.delay(user_email, code)
     return render(request, 'User/verify_registration.html', {'form': VerifyEmailForm, 'code': code})
 
@@ -137,21 +140,14 @@ class ChangePassWord(FormView):
 
 
 def reset_password(request, token):
-    if request.method == 'POST':
-        password_reset = PasswordReset.objects.filter(token=token, is_active=True).first()
-        if password_reset:
-            user = User.objects.get(email=password_reset.user.email)
-            new_password = request.POST.get('password')  # دریافت رمز عبور جدید از فرم
-
-            # تغییر رمز عبور کاربر
-            user.set_password(new_password)
-            user.save()
-
-            # غیرفعال کردن کد فعال‌سازی
-            password_reset.is_active = False
-            password_reset.save()
-
-    return render(request, 'User/forget_password_form.html', context={'form': ChangePasswordForm})
+    password_reset = PasswordReset.objects.filter(token=token, is_active=True).first()
+    if password_reset:
+        # Perform password reset here
+        password_reset.is_active = False
+        password_reset.save()
+        return redirect('home_page')
+    else:
+        return render(request, 'User/no_access.html')
 
 
 def email_send(request):
@@ -175,13 +171,7 @@ def verify_code(request):
         if form.is_valid():
             code = form.cleaned_data['code']
             if code == user_code:
-                sig = signing.TimestampSigner()
-                user_email = request.COOKIES.get('user_email')
-                user_email = sig.unsign_object(user_email)
-                user = get_object_or_404(User, email=user_email)
-                user.is_active = True
-                user.save()
-                return render(request, 'home-page.html', {'messages': _('You have successfully registered')})
+                return redirect('login_page')
             else:
                 return render(request, 'User/verify_registration.html',
                               {'form': VerifyEmailForm, 'code': code, 'message': 'code is not correct'})
@@ -214,16 +204,17 @@ class ShowCustomersView(DetailView):
     model = User
     template_name = 'User/customers.html'
 
-    def get(self, requset, *args, **kwargs):
-        user = requset.user
-        if user.is_authenticated:
-            if kwargs['pk'] == user.id:
-                return super().get(requset, *args, **kwargs)
-            else:
-                return redirect('home_page')
 
+def get(self, requset, *args, **kwargs):
+    user = requset.user
+    if user.is_authenticated:
+        if kwargs['pk'] == user.id:
+            return super().get(requset, *args, **kwargs)
         else:
             return redirect('home_page')
+
+    else:
+        return redirect('home_page')
 
 
 class EditProfileView(UpdateView):
