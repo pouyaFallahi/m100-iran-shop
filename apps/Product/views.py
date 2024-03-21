@@ -95,7 +95,7 @@ def remove_from_cart(request, product_id):
 
 
 class ShowListOfOrders(UpdateModelMixin,ListModelMixin,generics.GenericAPIView):
-    
+    pass
 
 
 # def show_cart_items(request : Request):
